@@ -47,6 +47,12 @@ Two HLSL probes do show differences:
 | `xcl-seed-722` | DXIL | **FAIL** | pass | skip |
 | `xcl-sext-i1-to-i64` | DXIL | pass | **FAIL** | skip |
 
+Other reports:
+
+| GPU | driver | commit | result | from |
+|---|---|---|---|---|
+| RX 9070 XT (RDNA4) + WARP | 32.0.32029.2010 | `9f74aa7` | same lines as the RX 9070: the four ordered `victory-v-cmp-*-shared-dword` vectors, `xcl-seed-1599` and `xcl-seed-722` fail with the same values | [#1](https://github.com/alexdeliu/rdna2-conformance/issues/1), @eazyves |
+
 WARP skips the `xcl-*` vectors because they need 32-lane waves. The `victory-*` ones run there, which also makes them a CI check.
 
 **More GPUs make this useful:** NVIDIA, Intel, other AMD generations and other drivers. Run it and add your report (see below).
