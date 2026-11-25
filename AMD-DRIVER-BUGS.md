@@ -1,5 +1,12 @@
 # AMD D3D12 shader compiler: miscompiles found with this kit
 
+> **Bugs 1 and 2 have one trigger, and plain HLSL hits it** (2026-11-25). Two 64-bit values built from constant-buffer dwords that overlap, such as `asdouble(v.x, v.y)` and `asdouble(v.y, v.z)` or the same pairs as `uint64_t`, give wrong i64 compares and wrong f64 add/mul on both GPUs. It happens whether the dwords come from root constants or from a CBV descriptor, as a title's constant buffers do, and with DXC's default build or with `-Gis`.
+> - The same dwords from a UAV, per lane or uniform, are right.
+> - Disjoint pairs are right.
+> - i64 add of the overlapping pairs is right.
+>
+> Sources: [`vectors/hlsl-cbv-*.hlsl`](vectors) and `vectors/hlsl-cbuffer-*.hlsl`. Results: [`results/2026-11-25-cbuffer-cbv.md`](results/2026-11-25-cbuffer-cbv.md).
+
 Each bug below is a **validator-passing DXIL container** that runs right on WARP and gives wrong results on AMD hardware. Each one comes with its inputs and the expected outputs, computed on the CPU.
 
 They were found while testing GPU translators for Xbox Series (RDNA2) code: VIctory, Belobug's VIctory fork and XCL. Each translator works around them.

@@ -16,6 +16,8 @@ The same operation passes when it is written in HLSL and compiled by DXC, and fa
 | ordered i64 compare (`lt`/`gt`, signed or not) of values sharing a dword | pass everywhere | `victory-v-cmp-*-shared-dword` (VIctory before [#1599](https://github.com/Marvisak/VIctory/pull/1599)); XCL's IR shape passes | RDNA2 and RDNA4 here; RDNA3 in #1599 |
 | f64 add/mul of two doubles sharing a dword (`v_add_f64 v[0:1], v[1:2], v[2:3]`): the result is computed as if both sources were the first pair, e.g. `1.5 + x` gives `3.0`; disjoint pairs are right | pass with UAV operands, per lane or uniform (`f64-shared-dword`, `-uniform`, `-gis`); **fails from a constant buffer** (`hlsl-cbuffer-*`, plain HLSL) | `belobug-v-{add,mul}-f64-shared-dword-*` (i64 join/split, then `makeDouble`); `belobug-direct-*` (`makeDouble` of the dwords) | RDNA4 for both shapes; RDNA2 for the direct one |
 
+**Bugs 1 and 2 come from plain HLSL too:** two 64-bit values built from overlapping constant-buffer dwords (root constants or a CBV), on both AMD GPUs. See [`AMD-DRIVER-BUGS.md`](AMD-DRIVER-BUGS.md).
+
 The five driver bugs, written up for AMD: [`AMD-DRIVER-BUGS.md`](AMD-DRIVER-BUGS.md). They were [reported to AMD](https://devcommunity.amd.com/t/d3d12-shader-compiler-5-miscompiles-of-validator-passing-dxil-on-rx-9070-rdna4-and-rdna2-with-repro-vectors/1518) on 2026-11-25.
 
 So a driver bug is a property of the DXIL's exact shape, and a translator has to test the DXIL it writes. That is why this kit runs **DXIL vectors**: a translator's own containers with their inputs and expected outputs. It also runs HLSL probes, which catch what DXC itself does (fast-math, precision).

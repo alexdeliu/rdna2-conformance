@@ -290,7 +290,7 @@ impl Gpu {
             let heap: ID3D12DescriptorHeap = d
                 .CreateDescriptorHeap(&D3D12_DESCRIPTOR_HEAP_DESC {
                     Type: D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
-                    NumDescriptors: 1,
+                    NumDescriptors: 2,
                     Flags: D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
                     NodeMask: 0,
                 })
@@ -313,6 +313,19 @@ impl Gpu {
                 }),
                 heap.GetCPUDescriptorHandleForHeapStart(),
             );
+            // Heap index 1: a CBV holding the same user data as the root
+            // constants, for vectors that read it through a descriptor (as a
+            // title's constant buffers are) instead of root constants.
+            let cbuf = buffer(d, 256, D3D12_HEAP_TYPE_UPLOAD, D3D12_RESOURCE_STATE_GENERIC_READ, false)?;
+            let mut cbv_at = heap.GetCPUDescriptorHandleForHeapStart();
+            cbv_at.ptr += d.GetDescriptorHandleIncrementSize(D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV) as usize;
+            d.CreateConstantBufferView(
+                Some(&D3D12_CONSTANT_BUFFER_VIEW_DESC {
+                    BufferLocation: cbuf.GetGPUVirtualAddress(),
+                    SizeInBytes: 256,
+                }),
+                cbv_at,
+            );
             let alloc: ID3D12CommandAllocator =
                 d.CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_COMPUTE).map_err(err)?;
             let fence: ID3D12Fence = d.CreateFence(0, D3D12_FENCE_FLAG_NONE).map_err(err)?;
@@ -324,6 +337,10 @@ impl Gpu {
                 for &(index, input) in inputs {
                     ud[index] = case[input];
                 }
+                let mut p: *mut std::ffi::c_void = std::ptr::null_mut();
+                cbuf.Map(0, None, Some(&mut p)).map_err(err)?;
+                std::ptr::copy_nonoverlapping(ud.as_ptr(), p.cast::<u32>(), ud.len().min(64));
+                cbuf.Unmap(0, None);
                 alloc.Reset().map_err(err)?;
                 let list: ID3D12GraphicsCommandList = d
                     .CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_COMPUTE, &alloc, &pso)

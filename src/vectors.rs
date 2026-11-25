@@ -12,7 +12,8 @@
 //!   One dispatch.
 //! - `layout victory` (VIctory's one-thread kernels): user data in root
 //!   constants `b0`, the result in a raw UAV at index 0 of a directly indexed
-//!   heap. Keys: `ud_dwords <n>`, `ud_inputs <ud index>:<input>...`,
+//!   heap; index 1 is a CBV holding the same user data (for vectors that read
+//!   it through a descriptor). Keys: `ud_dwords <n>`, `ud_inputs <ud index>:<input>...`,
 //!   `heap_raw_uav_dwords <n>`, and one `case <in0> <in1> <in2> <in3> <expected dword 0>`
 //!   line per dispatch (hex).
 

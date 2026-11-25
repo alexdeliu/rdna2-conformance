@@ -1,0 +1,500 @@
+# rdna2-conformance report
+
+- rdna2-conformance 0.1.0, dxcompiler.dll: 1.7 - 1.7.2308.16 (52da17e29); dxil.dll: 1.7(101.7.2308.24)
+- AMD Radeon RX 9070: vendor 0x1002, device 0x7550, driver 32.0.32029.2010
+- AMD Radeon(TM) Graphics: vendor 0x1002, device 0x164e, driver 32.0.21045.29003
+- WARP: vendor 0x1414, device 0x008c, driver 10.0.26100.9818
+
+| probe | kind | AMD Radeon RX 9070 | AMD Radeon(TM) Graphics | WARP |
+|---|---|---|---|---|
+| `i64-compare-shared-dword` | HLSL | pass | pass | pass |
+| `i64-compare-disjoint` | HLSL | pass | pass | pass |
+| `f64-shared-dword` | HLSL | pass | pass | pass |
+| `f64-disjoint` | HLSL | pass | pass | pass |
+| `f64-shared-dword-uniform` | HLSL | pass | pass | pass |
+| `f64-disjoint-uniform` | HLSL | pass | pass | pass |
+| `f64-shared-dword-gis` | HLSL | pass | pass | pass |
+| `f64-shared-dword-uniform-gis` | HLSL | pass | pass | pass |
+| `sext-bool-to-i64` | HLSL | pass | pass | pass |
+| `f32-mul-negative-zero` | HLSL | pass | pass | pass |
+| `f16-mul-negative-zero` | HLSL | pass | pass | pass |
+| `sin-cos-in-turns` | HLSL | info | info | pass |
+| `wave-read-first-in-switch` | HLSL | pass | pass | pass |
+| `dot2add-f16-rounding` | HLSL | info | pass | info |
+| `belobug-direct-v-add-f64-shared-dword-hi` | DXIL | **FAIL** (30) | **FAIL** (30) | pass |
+| `belobug-direct-v-add-f64-shared-dword-lo` | DXIL | **FAIL** (30) | **FAIL** (30) | pass |
+| `belobug-direct-v-mul-f64-shared-dword-hi` | DXIL | **FAIL** (29) | **FAIL** (29) | pass |
+| `belobug-direct-v-mul-f64-shared-dword-lo` | DXIL | **FAIL** (29) | **FAIL** (29) | pass |
+| `belobug-v-add-f64-disjoint-hi` | DXIL | pass | pass | pass |
+| `belobug-v-add-f64-disjoint-lo` | DXIL | pass | pass | pass |
+| `belobug-v-add-f64-shared-dword-hi` | DXIL | **FAIL** (30) | pass | pass |
+| `belobug-v-add-f64-shared-dword-lo` | DXIL | **FAIL** (30) | pass | pass |
+| `belobug-v-mul-f64-disjoint-hi` | DXIL | pass | pass | pass |
+| `belobug-v-mul-f64-disjoint-lo` | DXIL | pass | pass | pass |
+| `belobug-v-mul-f64-shared-dword-hi` | DXIL | **FAIL** (29) | pass | pass |
+| `belobug-v-mul-f64-shared-dword-lo` | DXIL | **FAIL** (29) | pass | pass |
+| `hlsl-cbuffer-i64-add-disjoint` | DXIL | pass | pass | pass |
+| `hlsl-cbuffer-i64-add-shared` | DXIL | pass | pass | pass |
+| `hlsl-cbuffer-i64-addhi-disjoint` | DXIL | pass | pass | pass |
+| `hlsl-cbuffer-i64-addhi-shared` | DXIL | pass | pass | pass |
+| `hlsl-cbuffer-i64-slt-disjoint` | DXIL | pass | pass | pass |
+| `hlsl-cbuffer-i64-slt-shared` | DXIL | **FAIL** (13) | **FAIL** (13) | pass |
+| `hlsl-cbuffer-i64-ult-disjoint` | DXIL | pass | pass | pass |
+| `hlsl-cbuffer-i64-ult-shared` | DXIL | **FAIL** (18) | **FAIL** (18) | pass |
+| `hlsl-cbuffer-v-add-f64-disjoint-lo-fast` | DXIL | pass | pass | pass |
+| `hlsl-cbuffer-v-add-f64-disjoint-lo-gis` | DXIL | pass | pass | pass |
+| `hlsl-cbuffer-v-add-f64-shared-dword-lo-fast` | DXIL | **FAIL** (30) | **FAIL** (30) | pass |
+| `hlsl-cbuffer-v-add-f64-shared-dword-lo-gis` | DXIL | **FAIL** (30) | **FAIL** (30) | pass |
+| `hlsl-cbv-f64-disjoint` | DXIL | pass | pass | pass |
+| `hlsl-cbv-f64-shared` | DXIL | **FAIL** (30) | **FAIL** (30) | pass |
+| `hlsl-cbv-i64-slt-shared` | DXIL | **FAIL** (13) | **FAIL** (13) | pass |
+| `hlsl-cbv-i64-ult-disjoint` | DXIL | pass | pass | pass |
+| `hlsl-cbv-i64-ult-shared` | DXIL | **FAIL** (18) | **FAIL** (18) | pass |
+| `victory-v-cmp-eq-i64-shared-dword` | DXIL | pass | pass | pass |
+| `victory-v-cmp-gt-i64-shared-dword` | DXIL | **FAIL** (12) | **FAIL** (12) | pass |
+| `victory-v-cmp-gt-u64-shared-dword` | DXIL | **FAIL** (21) | **FAIL** (21) | pass |
+| `victory-v-cmp-lt-i64-shared-dword` | DXIL | **FAIL** (14) | **FAIL** (14) | pass |
+| `victory-v-cmp-lt-u64-shared-dword` | DXIL | **FAIL** (21) | **FAIL** (21) | pass |
+| `xcl-i64-compare-disjoint` | DXIL | pass | pass | skip |
+| `xcl-i64-compare-shared-dword` | DXIL | pass | pass | skip |
+| `xcl-seed-1599` | DXIL | **FAIL** (63) | pass | skip |
+| `xcl-seed-540` | DXIL | pass | **FAIL** (20) | skip |
+| `xcl-seed-722` | DXIL | **FAIL** (1) | pass | skip |
+| `xcl-sext-i1-to-i64` | DXIL | pass | **FAIL** (20) | skip |
+
+`FAIL (n)`: n lanes (HLSL) or output dwords (DXIL) wrong. `info`: measured, no single right answer.
+
+## Details
+
+### `i64-compare-shared-dword` (HLSL)
+
+64-bit integer compares of two values that share a dword (v[1:2] vs v[2:3]) order wrong. Found in: Marvisak/VIctory#1599 (RDNA2, RDNA3, RDNA4).
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `i64-compare-disjoint` (HLSL)
+
+control for the above: the same compares on disjoint dwords. Found in: Marvisak/VIctory#1599.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `f64-shared-dword` (HLSL)
+
+f64 add and mul of two doubles that share a dword (asdouble(x, y) and asdouble(y, z)), as v_add_f64 v[1:2], v[2:3] lowers. Found in: Belobug/VIctory-Belobug-AMD f64 lowering (RX 9070; gfx1036 with makeDouble of the dwords).
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `f64-disjoint` (HLSL)
+
+control for the above: the same f64 add and mul on disjoint dwords. Found in: Belobug/VIctory-Belobug-AMD.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `f64-shared-dword-uniform` (HLSL)
+
+f64-shared-dword with uniform operands (every lane reads lane 0's dwords): the shape a translator's scalar-register doubles take. Found in: rdna2-conformance: narrowing bug 2 (per-lane operands pass).
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `f64-disjoint-uniform` (HLSL)
+
+control for the above: uniform operands on disjoint dwords. Found in: rdna2-conformance.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `f64-shared-dword-gis` (HLSL)
+
+f64-shared-dword built with -Gis: no `fast` flags, as a translator's fadd/fmul. Found in: rdna2-conformance: narrowing bug 2.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `f64-shared-dword-uniform-gis` (HLSL)
+
+f64-shared-dword-uniform built with -Gis. Found in: rdna2-conformance: narrowing bug 2.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `sext-bool-to-i64` (HLSL)
+
+sext i1 -> i64 leaves the high dword 0 (0x00000000_ffffffff for true). Found in: xcl-dev/xcl fuzz seed 540 (RDNA2).
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `f32-mul-negative-zero` (HLSL)
+
+a product that is -0 comes out +0 (fast-math nsz; DXC's default build vs -Gis). Found in: xcl-dev/xcl HLSL backend vs direct DXIL (RDNA2, RDNA4).
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `f16-mul-negative-zero` (HLSL)
+
+an f16 product that is -0 comes out +0 (fast-math nsz; DXC's default build vs -Gis). Found in: xcl-dev/xcl HLSL backend vs direct DXIL (RDNA2, RDNA4).
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `sin-cos-in-turns` (HLSL)
+
+sin(x * 2pi) / cos(x * 2pi), as translators lower v_sin_f32 / v_cos_f32, differ between DXC's default build and -Gis. Found in: xcl-dev/xcl HLSL backend vs direct DXIL (RDNA2, RDNA4).
+
+- AMD Radeon RX 9070: builds differ on 34 lanes; e.g. lane 0: in [7f7fffff, 00000000, 00000000, 00000000], builds give [00000000, ffc00000]
+- AMD Radeon(TM) Graphics: builds differ on 34 lanes; e.g. lane 0: in [7f7fffff, 00000000, 00000000, 00000000], builds give [00000000, ffc00000]
+- WARP: pass
+
+### `wave-read-first-in-switch` (HLSL)
+
+WaveReadLaneFirst taken in a divergent switch case returns the lane's own value. Found in: xcl-dev/xcl fuzz seed 722 (RDNA4).
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `dot2add-f16-rounding` (HLSL)
+
+dot2add(half2, half2, float) vs the correctly rounded result (precision is implementation-defined; informational). Found in: xcl-dev/xcl v_dot2_f32_f16, RDNA4 vs RDNA2.
+
+- AMD Radeon RX 9070: 3 of 64 not correctly rounded, at most 1 ulp
+- AMD Radeon(TM) Graphics: pass
+- WARP: 7 of 64 not correctly rounded, at most 2 ulp
+
+### `belobug-direct-v-add-f64-shared-dword-hi` (DXIL)
+
+v_add_f64 v[0:1], v[1:2], v[2:3] (shares v2 with src0); stores the result's hi dword. Found in: Belobug/VIctory-Belobug-AMD 71652a2 lowering with the dwords passed to makeDouble directly.
+
+- AMD Radeon RX 9070: FAIL (30 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x40080000, want 0x3ff80000
+- AMD Radeon(TM) Graphics: FAIL (30 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x40080000, want 0x3ff80000
+- WARP: pass
+
+### `belobug-direct-v-add-f64-shared-dword-lo` (DXIL)
+
+v_add_f64 v[0:1], v[1:2], v[2:3] (shares v2 with src0); stores the result's lo dword. Found in: Belobug/VIctory-Belobug-AMD 71652a2 lowering with the dwords passed to makeDouble directly.
+
+- AMD Radeon RX 9070: FAIL (30 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x1ffc0000, want 0x0
+- AMD Radeon(TM) Graphics: FAIL (30 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x1ffc0000, want 0x0
+- WARP: pass
+
+### `belobug-direct-v-mul-f64-shared-dword-hi` (DXIL)
+
+v_mul_f64 v[0:1], v[1:2], v[2:3] (shares v2 with src0); stores the result's hi dword. Found in: Belobug/VIctory-Belobug-AMD 71652a2 lowering with the dwords passed to makeDouble directly.
+
+- AMD Radeon RX 9070: FAIL (29 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x40020000, want 0x0
+- AMD Radeon(TM) Graphics: FAIL (29 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x40020000, want 0x0
+- WARP: pass
+
+### `belobug-direct-v-mul-f64-shared-dword-lo` (DXIL)
+
+v_mul_f64 v[0:1], v[1:2], v[2:3] (shares v2 with src0); stores the result's lo dword. Found in: Belobug/VIctory-Belobug-AMD 71652a2 lowering with the dwords passed to makeDouble directly.
+
+- AMD Radeon RX 9070: FAIL (29 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x2ffa0000, want 0x5ff40000
+- AMD Radeon(TM) Graphics: FAIL (29 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x2ffa0000, want 0x5ff40000
+- WARP: pass
+
+### `belobug-v-add-f64-disjoint-hi` (DXIL)
+
+v_add_f64 v[0:1], v[1:2], v[3:4]; stores the result's hi dword. Found in: Belobug/VIctory-Belobug-AMD 71652a2 lowering (i64 join/split, then makeDouble).
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `belobug-v-add-f64-disjoint-lo` (DXIL)
+
+v_add_f64 v[0:1], v[1:2], v[3:4]; stores the result's lo dword. Found in: Belobug/VIctory-Belobug-AMD 71652a2 lowering (i64 join/split, then makeDouble).
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `belobug-v-add-f64-shared-dword-hi` (DXIL)
+
+v_add_f64 v[0:1], v[1:2], v[2:3] (shares v2 with src0); stores the result's hi dword. Found in: Belobug/VIctory-Belobug-AMD 71652a2 lowering (i64 join/split, then makeDouble).
+
+- AMD Radeon RX 9070: FAIL (30 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x40080000, want 0x3ff80000
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `belobug-v-add-f64-shared-dword-lo` (DXIL)
+
+v_add_f64 v[0:1], v[1:2], v[2:3] (shares v2 with src0); stores the result's lo dword. Found in: Belobug/VIctory-Belobug-AMD 71652a2 lowering (i64 join/split, then makeDouble).
+
+- AMD Radeon RX 9070: FAIL (30 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x1ffc0000, want 0x0
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `belobug-v-mul-f64-disjoint-hi` (DXIL)
+
+v_mul_f64 v[0:1], v[1:2], v[3:4]; stores the result's hi dword. Found in: Belobug/VIctory-Belobug-AMD 71652a2 lowering (i64 join/split, then makeDouble).
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `belobug-v-mul-f64-disjoint-lo` (DXIL)
+
+v_mul_f64 v[0:1], v[1:2], v[3:4]; stores the result's lo dword. Found in: Belobug/VIctory-Belobug-AMD 71652a2 lowering (i64 join/split, then makeDouble).
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `belobug-v-mul-f64-shared-dword-hi` (DXIL)
+
+v_mul_f64 v[0:1], v[1:2], v[2:3] (shares v2 with src0); stores the result's hi dword. Found in: Belobug/VIctory-Belobug-AMD 71652a2 lowering (i64 join/split, then makeDouble).
+
+- AMD Radeon RX 9070: FAIL (29 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x40020000, want 0x0
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `belobug-v-mul-f64-shared-dword-lo` (DXIL)
+
+v_mul_f64 v[0:1], v[1:2], v[2:3] (shares v2 with src0); stores the result's lo dword. Found in: Belobug/VIctory-Belobug-AMD 71652a2 lowering (i64 join/split, then makeDouble).
+
+- AMD Radeon RX 9070: FAIL (29 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x2ffa0000, want 0x5ff40000
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `hlsl-cbuffer-i64-add-disjoint` (DXIL)
+
+plain HLSL (vectors/hlsl-cbuffer-i64-add-disjoint.hlsl): uint64_t add of two values built from root-constant dwords, disjoint (control); stores dword 0. Found in: rdna2-conformance: does bug 1 (shared-dword i64) also come from constant-buffer dwords?.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `hlsl-cbuffer-i64-add-shared` (DXIL)
+
+plain HLSL (vectors/hlsl-cbuffer-i64-add-shared.hlsl): uint64_t add of two values built from root-constant dwords, sharing v.y; stores dword 0. Found in: rdna2-conformance: does bug 1 (shared-dword i64) also come from constant-buffer dwords?.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `hlsl-cbuffer-i64-addhi-disjoint` (DXIL)
+
+plain HLSL (vectors/hlsl-cbuffer-i64-addhi-disjoint.hlsl): uint64_t addhi of two values built from root-constant dwords, disjoint (control); stores dword 0. Found in: rdna2-conformance: does bug 1 (shared-dword i64) also come from constant-buffer dwords?.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `hlsl-cbuffer-i64-addhi-shared` (DXIL)
+
+plain HLSL (vectors/hlsl-cbuffer-i64-addhi-shared.hlsl): uint64_t addhi of two values built from root-constant dwords, sharing v.y; stores dword 0. Found in: rdna2-conformance: does bug 1 (shared-dword i64) also come from constant-buffer dwords?.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `hlsl-cbuffer-i64-slt-disjoint` (DXIL)
+
+plain HLSL (vectors/hlsl-cbuffer-i64-slt-disjoint.hlsl): int64_t slt of two values built from root-constant dwords, disjoint (control); stores dword 0. Found in: rdna2-conformance: does bug 1 (shared-dword i64) also come from constant-buffer dwords?.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `hlsl-cbuffer-i64-slt-shared` (DXIL)
+
+plain HLSL (vectors/hlsl-cbuffer-i64-slt-shared.hlsl): int64_t slt of two values built from root-constant dwords, sharing v.y; stores dword 0. Found in: rdna2-conformance: does bug 1 (shared-dword i64) also come from constant-buffer dwords?.
+
+- AMD Radeon RX 9070: FAIL (13 wrong); first: case [00000000, 00000001, 00000000, 00000000]: got 0x1, want 0x0
+- AMD Radeon(TM) Graphics: FAIL (13 wrong); first: case [00000000, 00000001, 00000000, 00000000]: got 0x1, want 0x0
+- WARP: pass
+
+### `hlsl-cbuffer-i64-ult-disjoint` (DXIL)
+
+plain HLSL (vectors/hlsl-cbuffer-i64-ult-disjoint.hlsl): uint64_t ult of two values built from root-constant dwords, disjoint (control); stores dword 0. Found in: rdna2-conformance: does bug 1 (shared-dword i64) also come from constant-buffer dwords?.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `hlsl-cbuffer-i64-ult-shared` (DXIL)
+
+plain HLSL (vectors/hlsl-cbuffer-i64-ult-shared.hlsl): uint64_t ult of two values built from root-constant dwords, sharing v.y; stores dword 0. Found in: rdna2-conformance: does bug 1 (shared-dword i64) also come from constant-buffer dwords?.
+
+- AMD Radeon RX 9070: FAIL (18 wrong); first: case [00000000, 00000001, 00000000, 00000000]: got 0x1, want 0x0
+- AMD Radeon(TM) Graphics: FAIL (18 wrong); first: case [00000000, 00000001, 00000000, 00000000]: got 0x1, want 0x0
+- WARP: pass
+
+### `hlsl-cbuffer-v-add-f64-disjoint-lo-fast` (DXIL)
+
+plain HLSL (vectors/hlsl-cbuffer-f64-disjoint.hlsl, DXC default build): f64 add of two asdouble() of root-constant dwords, disjoint dwords (control); stores the result's lo dword. Found in: rdna2-conformance: bug 2 from plain HLSL, the doubles' dwords from a constant buffer.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `hlsl-cbuffer-v-add-f64-disjoint-lo-gis` (DXIL)
+
+plain HLSL (vectors/hlsl-cbuffer-f64-disjoint.hlsl, DXC -Gis): f64 add of two asdouble() of root-constant dwords, disjoint dwords (control); stores the result's lo dword. Found in: rdna2-conformance: bug 2 from plain HLSL, the doubles' dwords from a constant buffer.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `hlsl-cbuffer-v-add-f64-shared-dword-lo-fast` (DXIL)
+
+plain HLSL (vectors/hlsl-cbuffer-f64-shared-dword.hlsl, DXC default build): f64 add of two asdouble() of root-constant dwords, shared dwords; stores the result's lo dword. Found in: rdna2-conformance: bug 2 from plain HLSL, the doubles' dwords from a constant buffer.
+
+- AMD Radeon RX 9070: FAIL (30 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x1ffc0000, want 0x0
+- AMD Radeon(TM) Graphics: FAIL (30 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x1ffc0000, want 0x0
+- WARP: pass
+
+### `hlsl-cbuffer-v-add-f64-shared-dword-lo-gis` (DXIL)
+
+plain HLSL (vectors/hlsl-cbuffer-f64-shared-dword.hlsl, DXC -Gis): f64 add of two asdouble() of root-constant dwords, shared dwords; stores the result's lo dword. Found in: rdna2-conformance: bug 2 from plain HLSL, the doubles' dwords from a constant buffer.
+
+- AMD Radeon RX 9070: FAIL (30 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x1ffc0000, want 0x0
+- AMD Radeon(TM) Graphics: FAIL (30 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x1ffc0000, want 0x0
+- WARP: pass
+
+### `hlsl-cbv-f64-disjoint` (DXIL)
+
+plain HLSL (vectors/hlsl-cbv-f64-disjoint.hlsl): as hlsl-cbuffer-f64-disjoint, but the user data read through a CBV descriptor (ResourceDescriptorHeap[1]), as a title's constant buffers are. Found in: rdna2-conformance: bugs 1 and 2 through a descriptor CBV, not root constants.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `hlsl-cbv-f64-shared` (DXIL)
+
+plain HLSL (vectors/hlsl-cbv-f64-shared.hlsl): as hlsl-cbuffer-f64-shared, but the user data read through a CBV descriptor (ResourceDescriptorHeap[1]), as a title's constant buffers are. Found in: rdna2-conformance: bugs 1 and 2 through a descriptor CBV, not root constants.
+
+- AMD Radeon RX 9070: FAIL (30 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x1ffc0000, want 0x0
+- AMD Radeon(TM) Graphics: FAIL (30 wrong); first: case [00000000, 3ff80000, 00000000, 40020000]: got 0x1ffc0000, want 0x0
+- WARP: pass
+
+### `hlsl-cbv-i64-slt-shared` (DXIL)
+
+plain HLSL (vectors/hlsl-cbv-i64-slt-shared.hlsl): as hlsl-cbuffer-i64-slt-shared, but the user data read through a CBV descriptor (ResourceDescriptorHeap[1]), as a title's constant buffers are. Found in: rdna2-conformance: bugs 1 and 2 through a descriptor CBV, not root constants.
+
+- AMD Radeon RX 9070: FAIL (13 wrong); first: case [00000000, 00000001, 00000000, 00000000]: got 0x1, want 0x0
+- AMD Radeon(TM) Graphics: FAIL (13 wrong); first: case [00000000, 00000001, 00000000, 00000000]: got 0x1, want 0x0
+- WARP: pass
+
+### `hlsl-cbv-i64-ult-disjoint` (DXIL)
+
+plain HLSL (vectors/hlsl-cbv-i64-ult-disjoint.hlsl): as hlsl-cbuffer-i64-ult-disjoint, but the user data read through a CBV descriptor (ResourceDescriptorHeap[1]), as a title's constant buffers are. Found in: rdna2-conformance: bugs 1 and 2 through a descriptor CBV, not root constants.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `hlsl-cbv-i64-ult-shared` (DXIL)
+
+plain HLSL (vectors/hlsl-cbv-i64-ult-shared.hlsl): as hlsl-cbuffer-i64-ult-shared, but the user data read through a CBV descriptor (ResourceDescriptorHeap[1]), as a title's constant buffers are. Found in: rdna2-conformance: bugs 1 and 2 through a descriptor CBV, not root constants.
+
+- AMD Radeon RX 9070: FAIL (18 wrong); first: case [00000000, 00000001, 00000000, 00000000]: got 0x1, want 0x0
+- AMD Radeon(TM) Graphics: FAIL (18 wrong); first: case [00000000, 00000001, 00000000, 00000000]: got 0x1, want 0x0
+- WARP: pass
+
+### `victory-v-cmp-eq-i64-shared-dword` (DXIL)
+
+v_cmp_eq_i64 s[20:21], v[1:2], v[2:3] (src0 and src1 share v2), then v_cndmask: 1 where the compare holds. Found in: Marvisak/VIctory lowering before #1599 (VIctory main 940d32f), fails on AMD RDNA2/3/4.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: pass
+
+### `victory-v-cmp-gt-i64-shared-dword` (DXIL)
+
+v_cmp_gt_i64 s[20:21], v[1:2], v[2:3] (src0 and src1 share v2), then v_cndmask: 1 where the compare holds. Found in: Marvisak/VIctory lowering before #1599 (VIctory main 940d32f), fails on AMD RDNA2/3/4.
+
+- AMD Radeon RX 9070: FAIL (12 wrong); first: case [00000000, 00000001, 00000000, 00000000]: got 0x0, want 0x1
+- AMD Radeon(TM) Graphics: FAIL (12 wrong); first: case [00000000, 00000001, 00000000, 00000000]: got 0x0, want 0x1
+- WARP: pass
+
+### `victory-v-cmp-gt-u64-shared-dword` (DXIL)
+
+v_cmp_gt_u64 s[20:21], v[1:2], v[2:3] (src0 and src1 share v2), then v_cndmask: 1 where the compare holds. Found in: Marvisak/VIctory lowering before #1599 (VIctory main 940d32f), fails on AMD RDNA2/3/4.
+
+- AMD Radeon RX 9070: FAIL (21 wrong); first: case [00000000, 00000001, 00000000, 00000000]: got 0x0, want 0x1
+- AMD Radeon(TM) Graphics: FAIL (21 wrong); first: case [00000000, 00000001, 00000000, 00000000]: got 0x0, want 0x1
+- WARP: pass
+
+### `victory-v-cmp-lt-i64-shared-dword` (DXIL)
+
+v_cmp_lt_i64 s[20:21], v[1:2], v[2:3] (src0 and src1 share v2), then v_cndmask: 1 where the compare holds. Found in: Marvisak/VIctory lowering before #1599 (VIctory main 940d32f), fails on AMD RDNA2/3/4.
+
+- AMD Radeon RX 9070: FAIL (14 wrong); first: case [00000000, 00000000, 00000001, 00000000]: got 0x0, want 0x1
+- AMD Radeon(TM) Graphics: FAIL (14 wrong); first: case [00000000, 00000000, 00000001, 00000000]: got 0x0, want 0x1
+- WARP: pass
+
+### `victory-v-cmp-lt-u64-shared-dword` (DXIL)
+
+v_cmp_lt_u64 s[20:21], v[1:2], v[2:3] (src0 and src1 share v2), then v_cndmask: 1 where the compare holds. Found in: Marvisak/VIctory lowering before #1599 (VIctory main 940d32f), fails on AMD RDNA2/3/4.
+
+- AMD Radeon RX 9070: FAIL (21 wrong); first: case [00000000, 00000000, 00000001, 00000000]: got 0x0, want 0x1
+- AMD Radeon(TM) Graphics: FAIL (21 wrong); first: case [00000000, 00000000, 00000001, 00000000]: got 0x0, want 0x1
+- WARP: pass
+
+### `xcl-i64-compare-disjoint` (DXIL)
+
+control: the same compares of x1:x0 against x3:x2. Found in: xcl-dev/xcl direct-DXIL emitter (gpu/dxil/fuzz_tests.rs), shape of Marvisak/VIctory#1599.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: skipped: needs 32-lane waves (device: 4..4)
+
+### `xcl-i64-compare-shared-dword` (DXIL)
+
+unsigned and signed i64 compares of x1:x0 against x2:x1 (one shared dword). Found in: xcl-dev/xcl direct-DXIL emitter (gpu/dxil/fuzz_tests.rs), shape of Marvisak/VIctory#1599.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: pass
+- WARP: skipped: needs 32-lane waves (device: 4..4)
+
+### `xcl-seed-1599` (DXIL)
+
+seed 1599's shape: Countbits.i64(2), shifted by the lane and or'd with its Bfrev. The RDNA4 failure is Bfrev(Countbits(<constant>)) = 0x80000001 instead of 0x80000000. Found in: xcl-dev/xcl direct-DXIL emitter (gpu/dxil/fuzz_tests.rs), fails on RDNA4.
+
+- AMD Radeon RX 9070: FAIL (63 wrong); first: out[1] = 0x00000001, want 0x00000000
+- AMD Radeon(TM) Graphics: pass
+- WARP: skipped: needs 32-lane waves (device: 4..4)
+
+### `xcl-seed-540` (DXIL)
+
+seed 540's shape: ashr(sext i1 -> i64, 63) - (-7). Found in: xcl-dev/xcl direct-DXIL emitter (gpu/dxil/fuzz_tests.rs), fails on RDNA2.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: FAIL (20 wrong); first: out[0] = 0x00000007, want 0x00000006
+- WARP: skipped: needs 32-lane waves (device: 4..4)
+
+### `xcl-seed-722` (DXIL)
+
+seed 722's shape: WaveReadLaneFirst, then a divergent switch whose case 1 reads it. Found in: xcl-dev/xcl direct-DXIL emitter (gpu/dxil/fuzz_tests.rs), fails on RDNA4.
+
+- AMD Radeon RX 9070: FAIL (1 wrong); first: out[30] = 0x00000001, want 0x7fffffff
+- AMD Radeon(TM) Graphics: pass
+- WARP: skipped: needs 32-lane waves (device: 4..4)
+
+### `xcl-sext-i1-to-i64` (DXIL)
+
+sext i1 -> i64 (trunc of the input to i1): the high dword must be all ones for a set bit. Found in: xcl-dev/xcl direct-DXIL emitter (gpu/dxil/fuzz_tests.rs), fails on RDNA2.
+
+- AMD Radeon RX 9070: pass
+- AMD Radeon(TM) Graphics: FAIL (20 wrong); first: out[64] = 0x00000000, want 0xffffffff
+- WARP: skipped: needs 32-lane waves (device: 4..4)
+
