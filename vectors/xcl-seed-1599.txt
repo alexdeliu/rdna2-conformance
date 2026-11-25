@@ -1,5 +1,5 @@
 id xcl-seed-1599
-about seed 1599's shape: Countbits.i64(2), shifted by the lane and or'd with its Bfrev
+about seed 1599's shape: Countbits.i64(2), shifted by the lane and or'd with its Bfrev. The RDNA4 failure is Bfrev(Countbits(<constant>)) = 0x80000001 instead of 0x80000000
 origin xcl-dev/xcl direct-DXIL emitter (gpu/dxil/fuzz_tests.rs), fails on RDNA4
 threads 32
 wave 32

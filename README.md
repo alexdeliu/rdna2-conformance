@@ -12,7 +12,7 @@ The same operation passes when it is written in HLSL and compiled by DXC, and fa
 |---|---|---|---|
 | `sext i1 → i64` keeps the high dword 0 | pass everywhere | `xcl-sext-i1-to-i64`, `xcl-seed-540` | RDNA2 (gfx1036, 32.0.21045.29003) |
 | `WaveReadLaneFirst` read in a divergent `switch` case | pass everywhere | `xcl-seed-722` | RDNA4 (RX 9070, 32.0.32029.2010) |
-| `Countbits.i64` result shifted by the lane, or'd with its `Bfrev` | – | `xcl-seed-1599` | RDNA4 |
+| `Bfrev(Countbits(<constant>))` gives `0x80000001` for `0x80000000` (seed 1599); `Bfrev` of a runtime value is right | – | `xcl-seed-1599` | RDNA4 |
 | ordered i64 compare (`lt`/`gt`, signed or not) of values sharing a dword | pass everywhere | `victory-v-cmp-*-shared-dword` (VIctory before [#1599](https://github.com/Marvisak/VIctory/pull/1599)); XCL's IR shape passes | RDNA2 and RDNA4 here; RDNA3 in #1599 |
 
 So a driver bug is a property of the DXIL's exact shape, and a translator has to test the DXIL it writes. That is why this kit runs **DXIL vectors**: a translator's own containers with their inputs and expected outputs. It also runs HLSL probes, which catch what DXC itself does (fast-math, precision).
