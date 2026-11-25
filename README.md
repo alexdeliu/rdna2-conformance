@@ -106,6 +106,6 @@ The `xcl-*` vectors were written by XCL's direct-DXIL emitter from small program
 
 ## License
 
-MIT (see `LICENSE`). The `.dxil` files in `vectors/` are translator output: `xcl-*` from XCL's emitter (GPL-2.0-only), for the programs in `tools/xcl_export.rs`; `victory-*` from VIctory's lowering, for the instructions in `tools/victory_export.rs`.
+MIT (see `LICENSE`). The `.dxil` files in `vectors/` are translator output: `xcl-*` from XCL's emitter (GPL-2.0-only), for the programs in `tools/xcl_export.rs`; `victory-*` from VIctory's lowering (GPL-3.0), for the instructions in `tools/victory_export.rs`. The `tools/*.rs` snippets are meant to be pasted into those projects' test files; they are offered under MIT, and they fall under each project's license once added there.
 
 Written with Claude Code (Claude Opus 5.5). Every result in this README comes from a run on the hardware named.
