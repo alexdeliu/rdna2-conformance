@@ -14,6 +14,9 @@ The same operation passes when it is written in HLSL and compiled by DXC, and fa
 | `WaveReadLaneFirst` read in a divergent `switch` case | pass everywhere | `xcl-seed-722` | RDNA4 (RX 9070, 32.0.32029.2010) |
 | `Bfrev(Countbits(<constant>))` gives `0x80000001` for `0x80000000` (seed 1599); `Bfrev` of a runtime value is right | – | `xcl-seed-1599` | RDNA4 |
 | ordered i64 compare (`lt`/`gt`, signed or not) of values sharing a dword | pass everywhere | `victory-v-cmp-*-shared-dword` (VIctory before [#1599](https://github.com/Marvisak/VIctory/pull/1599)); XCL's IR shape passes | RDNA2 and RDNA4 here; RDNA3 in #1599 |
+| f64 add/mul of two doubles sharing a dword (`v_add_f64 v[0:1], v[1:2], v[2:3]`): the result is computed as if both sources were the first pair, e.g. `1.5 + x` gives `3.0`; disjoint pairs are right | pass everywhere (`f64-shared-dword`) | `belobug-v-{add,mul}-f64-shared-dword-*` (i64 join/split, then `makeDouble`); `belobug-direct-*` (`makeDouble` of the dwords) | RDNA4 for both shapes; RDNA2 for the direct one |
+
+The five driver bugs, written up for AMD: [`AMD-DRIVER-BUGS.md`](AMD-DRIVER-BUGS.md).
 
 So a driver bug is a property of the DXIL's exact shape, and a translator has to test the DXIL it writes. That is why this kit runs **DXIL vectors**: a translator's own containers with their inputs and expected outputs. It also runs HLSL probes, which catch what DXC itself does (fast-math, precision).
 
@@ -29,23 +32,37 @@ Two HLSL probes do show differences:
 |---|---|---|---|---|
 | `i64-compare-shared-dword` | HLSL | pass | pass | pass |
 | `i64-compare-disjoint` | HLSL | pass | pass | pass |
+| `f64-shared-dword` | HLSL | pass | pass | pass |
+| `f64-disjoint` | HLSL | pass | pass | pass |
 | `sext-bool-to-i64` | HLSL | pass | pass | pass |
 | `f32-mul-negative-zero` | HLSL | pass | pass | pass |
 | `f16-mul-negative-zero` | HLSL | pass | pass | pass |
 | `sin-cos-in-turns` | HLSL | info | info | pass |
 | `wave-read-first-in-switch` | HLSL | pass | pass | pass |
 | `dot2add-f16-rounding` | HLSL | info | pass | info |
+| `belobug-direct-v-add-f64-shared-dword-hi` | DXIL | **FAIL** (30) | **FAIL** (30) | pass |
+| `belobug-direct-v-add-f64-shared-dword-lo` | DXIL | **FAIL** (30) | **FAIL** (30) | pass |
+| `belobug-direct-v-mul-f64-shared-dword-hi` | DXIL | **FAIL** (29) | **FAIL** (29) | pass |
+| `belobug-direct-v-mul-f64-shared-dword-lo` | DXIL | **FAIL** (29) | **FAIL** (29) | pass |
+| `belobug-v-add-f64-disjoint-hi` | DXIL | pass | pass | pass |
+| `belobug-v-add-f64-disjoint-lo` | DXIL | pass | pass | pass |
+| `belobug-v-add-f64-shared-dword-hi` | DXIL | **FAIL** (30) | pass | pass |
+| `belobug-v-add-f64-shared-dword-lo` | DXIL | **FAIL** (30) | pass | pass |
+| `belobug-v-mul-f64-disjoint-hi` | DXIL | pass | pass | pass |
+| `belobug-v-mul-f64-disjoint-lo` | DXIL | pass | pass | pass |
+| `belobug-v-mul-f64-shared-dword-hi` | DXIL | **FAIL** (29) | pass | pass |
+| `belobug-v-mul-f64-shared-dword-lo` | DXIL | **FAIL** (29) | pass | pass |
 | `victory-v-cmp-eq-i64-shared-dword` | DXIL | pass | pass | pass |
-| `victory-v-cmp-gt-i64-shared-dword` | DXIL | **FAIL** | **FAIL** | pass |
-| `victory-v-cmp-gt-u64-shared-dword` | DXIL | **FAIL** | **FAIL** | pass |
-| `victory-v-cmp-lt-i64-shared-dword` | DXIL | **FAIL** | **FAIL** | pass |
-| `victory-v-cmp-lt-u64-shared-dword` | DXIL | **FAIL** | **FAIL** | pass |
+| `victory-v-cmp-gt-i64-shared-dword` | DXIL | **FAIL** (12) | **FAIL** (12) | pass |
+| `victory-v-cmp-gt-u64-shared-dword` | DXIL | **FAIL** (21) | **FAIL** (21) | pass |
+| `victory-v-cmp-lt-i64-shared-dword` | DXIL | **FAIL** (14) | **FAIL** (14) | pass |
+| `victory-v-cmp-lt-u64-shared-dword` | DXIL | **FAIL** (21) | **FAIL** (21) | pass |
 | `xcl-i64-compare-disjoint` | DXIL | pass | pass | skip |
 | `xcl-i64-compare-shared-dword` | DXIL | pass | pass | skip |
-| `xcl-seed-1599` | DXIL | **FAIL** | pass | skip |
-| `xcl-seed-540` | DXIL | pass | **FAIL** | skip |
-| `xcl-seed-722` | DXIL | **FAIL** | pass | skip |
-| `xcl-sext-i1-to-i64` | DXIL | pass | **FAIL** | skip |
+| `xcl-seed-1599` | DXIL | **FAIL** (63) | pass | skip |
+| `xcl-seed-540` | DXIL | pass | **FAIL** (20) | skip |
+| `xcl-seed-722` | DXIL | **FAIL** (1) | pass | skip |
+| `xcl-sext-i1-to-i64` | DXIL | pass | **FAIL** (20) | skip |
 
 Other reports:
 
@@ -102,7 +119,7 @@ heap_raw_uav_dwords 1
 case <in0> <in1> <in2> <in3> <expected dword 0>    # hex, one line per dispatch
 ```
 
-The `xcl-*` vectors were written by XCL's direct-DXIL emitter from small programs in its fuzz IR ([`tools/xcl_export.rs`](tools/xcl_export.rs), which goes into XCL's `gpu/dxil/fuzz_tests.rs`). The `victory-*` vectors come from VIctory's lowering of single `v_cmp_*_i64` instructions, before #1599's fix ([`tools/victory_export.rs`](tools/victory_export.rs), which goes into the fuzzer file of VIctory#1614).
+The `xcl-*` vectors were written by XCL's direct-DXIL emitter from small programs in its fuzz IR ([`tools/xcl_export.rs`](tools/xcl_export.rs), which goes into XCL's `gpu/dxil/fuzz_tests.rs`). The `victory-*` vectors come from VIctory's lowering of single `v_cmp_*_i64` instructions, before #1599's fix ([`tools/victory_export.rs`](tools/victory_export.rs), which goes into the fuzzer file of VIctory#1614). The `belobug-*` vectors come from that fork's f64 lowering of single `v_add_f64`/`v_mul_f64` ([`tools/belobug_export.rs`](tools/belobug_export.rs)). The `belobug-direct-*` ones come from the same lowering with the dwords passed straight to `makeDouble`, which shows the driver bug does not need the i64 round trip.
 
 ## Where these came from
 
@@ -112,6 +129,6 @@ The `xcl-*` vectors were written by XCL's direct-DXIL emitter from small program
 
 ## License
 
-MIT (see `LICENSE`). The `.dxil` files in `vectors/` are translator output: `xcl-*` from XCL's emitter (GPL-2.0-only), for the programs in `tools/xcl_export.rs`; `victory-*` from VIctory's lowering (GPL-3.0), for the instructions in `tools/victory_export.rs`. The `tools/*.rs` snippets are meant to be pasted into those projects' test files; they are offered under MIT, and they fall under each project's license once added there.
+MIT (see `LICENSE`). The `.dxil` files in `vectors/` are translator output: `xcl-*` from XCL's emitter (GPL-2.0-only), for the programs in `tools/xcl_export.rs`; `victory-*` from VIctory's lowering (GPL-3.0), for the instructions in `tools/victory_export.rs`. `belobug-*` from Belobug/VIctory-Belobug-AMD's lowering at `71652a2` (GPL-3.0), for the instructions in `tools/belobug_export.rs`. The `tools/*.rs` snippets are meant to be pasted into those projects' test files; they are offered under MIT, and they fall under each project's license once added there.
 
 Written with Claude Code (Claude Opus 5.5). Every result in this README comes from a run on the hardware named.

@@ -159,6 +159,43 @@ r.x = (a < b ? 1u : 0u) | (a <= b ? 2u : 0u) | (a > b ? 4u : 0u) | (a >= b ? 8u 
     | (sa < sb ? 16u : 0u) | (sa <= sb ? 32u : 0u) | (sa > sb ? 64u : 0u) | (sa >= sb ? 128u : 0u)
     | (a == b ? 256u : 0u) | (a != b ? 512u : 0u);";
 
+const F64_BODY: &str = "\
+double a = asdouble(x.x, x.y);
+double b = asdouble(x.y, x.z);
+asuint(a + b, r.x, r.y);
+asuint(a * b, r.z, r.w);";
+
+const F64_DISJOINT_BODY: &str = "\
+double a = asdouble(x.x, x.y);
+double b = asdouble(x.z, x.w);
+asuint(a + b, r.x, r.y);
+asuint(a * b, r.z, r.w);";
+
+/// 1.5 + 2.25 style cases first: a wrong pairing shows as an exact other number.
+const F64_FIXED: &[[u32; 4]] = &[
+    [0, 0x3FF8_0000, 0, 0x4002_0000],
+    [0, 0x3FF0_0000, 0x3FF0_0000, 0x4000_0000],
+    [0, 0x4000_0000, 0x4000_0000, 0x4008_0000],
+];
+
+/// Dwords that make normal doubles as either half (no denormals, NaNs or infinities).
+fn f64_dwords(r: &mut Rng) -> [u32; 4] {
+    [
+        r.next(),
+        0x3F00_0000 | (r.next() & 0x00FF_FFFF),
+        0x3F00_0000 | (r.next() & 0x00FF_FFFF),
+        0x3F00_0000 | (r.next() & 0x00FF_FFFF),
+    ]
+}
+
+fn f64_want(x: [u32; 4], disjoint: bool) -> [u32; 4] {
+    let d = |lo: u32, hi: u32| f64::from_bits(u64::from(lo) | u64::from(hi) << 32);
+    let a = d(x[0], x[1]);
+    let b = if disjoint { d(x[2], x[3]) } else { d(x[1], x[2]) };
+    let (s, m) = ((a + b).to_bits(), (a * b).to_bits());
+    [s as u32, (s >> 32) as u32, m as u32, (m >> 32) as u32]
+}
+
 /// Dword triples whose order as (lo, hi) pairs and as swapped pairs disagree.
 const CMP_FIXED: &[[u32; 4]] = &[
     [0, 0, 1, 0],
@@ -342,6 +379,26 @@ pub fn all() -> Vec<Probe> {
                     [!0, 0, 0, 0],
                 )
             },
+        },
+        Probe {
+            id: "f64-shared-dword",
+            about: "f64 add and mul of two doubles that share a dword (asdouble(x, y) and asdouble(y, z)), as v_add_f64 v[1:2], v[2:3] lowers",
+            origin: "Belobug/VIctory-Belobug-AMD f64 lowering (RX 9070; gfx1036 with makeDouble of the dwords)",
+            body: F64_BODY,
+            builds: PLAIN,
+            needs_16bit: false,
+            input: || lanes(0xF64, F64_FIXED, f64_dwords),
+            check: |i, o| per_lane(i, o, |_, x| f64_want(x, false), [!0, !0, !0, !0]),
+        },
+        Probe {
+            id: "f64-disjoint",
+            about: "control for the above: the same f64 add and mul on disjoint dwords",
+            origin: "Belobug/VIctory-Belobug-AMD",
+            body: F64_DISJOINT_BODY,
+            builds: PLAIN,
+            needs_16bit: false,
+            input: || lanes(0xF65, F64_FIXED, f64_dwords),
+            check: |i, o| per_lane(i, o, |_, x| f64_want(x, true), [!0, !0, !0, !0]),
         },
         Probe {
             id: "sext-bool-to-i64",

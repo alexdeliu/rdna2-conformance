@@ -1,0 +1,39 @@
+id belobug-v-add-f64-disjoint-lo
+about v_add_f64 v[0:1], v[1:2], v[3:4]; stores the result's lo dword
+origin Belobug/VIctory-Belobug-AMD 71652a2 lowering (i64 join/split, then makeDouble)
+layout victory
+ud_dwords 8
+ud_inputs 0:0 1:1 2:2 3:3
+heap_raw_uav_dwords 1
+case 00000000 3ff80000 00000000 40020000 00000000
+case 00000000 3ff00000 3ff00000 40000000 3ff00000
+case 00000000 40000000 40000000 40080000 20000000
+case 00000000 3effffff 7f800001 3f800000 7f000001
+case 4f000000 0000001f 37a77c00 00000000 86a77c00
+case deadbeef afb528f6 1400bc00 00000000 deadbeef
+case a0eb5525 3fea2302 3f6fdf99 3f344456 2bb34321
+case daa4b475 3fe27462 3f638593 3f1a465f 0d9eaf91
+case 7aece0d3 3ff8bc38 3fafbb59 3fd96b01 cad8cfa9
+case 16a2f30e 3f013b47 3f567be9 3f8fa68a 866d1edc
+case 622518dc 3fe8603d 3f3491d6 3f151cc8 48671281
+case f7c061ad 3f621056 3fe17e88 3f0081c0 f8bfe7a7
+case 41388f1e 3ff292d3 3f0a9e51 3f90012e fa34b997
+case dbdca31f 3f3c0e49 3ffc4b2f 3fc823b2 64ea3981
+case 68308af2 3fde92c2 3f5236d0 3fb52ef3 9c028c53
+case edb23b00 3ff7333b 3f3e3a03 3f546130 39c20a8f
+case 61743ff5 3f0b26a8 3f2cd1bc 3f7f79b1 8fefba3c
+case 470407df 3fd03058 3f7e01b9 3f524c7b c24385e1
+case cb4920fb 3f5fba5a 3fd0fcca 3f2d4167 d9a1a04a
+case a409d3e4 3f032a65 3f2f7b5d 3f012208 f19ca7a0
+case df0f6c34 3f24a0cf 3fc39eab 3f80a70a 7f3fdc5c
+case 87c02f52 3f5220f5 3f28a4a4 3f908711 97a4a799
+case 25dd04ed 3f556a00 3fdb28be 3f12ceda c9dab779
+case 801d28b0 3f0091e7 3f2c2b47 3fc2d60d 5da42d1a
+case 5d9e2a38 3f8c98e1 3f7342a4 3feed64e c4e9bb4d
+case 70c90f15 3f6e7d51 3fb7b548 3f3cdbac 7c6002df
+case d5667411 3ffe6ce0 3f83e929 3f8dca77 c3e57be3
+case 08c94952 3f8458e9 3f5fdfb8 3fed0026 e38304dd
+case ab2309ce 3f88f3be 3f23fa2d 3fde39d3 347d127b
+case 240d8477 3f38e4cb 3fa4a55e 3fc9f764 a536ac20
+case 93797f6f 3fa75b90 3fd09d5b 3fa1c9c7 e9a50e65
+case 0eba1409 3fb45835 3f86f3e2 3f6449d6 c0b64ba8
