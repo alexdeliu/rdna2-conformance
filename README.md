@@ -13,7 +13,7 @@ The same operation passes when it is written in HLSL and compiled by DXC, and fa
 | `sext i1 → i64` keeps the high dword 0 | pass everywhere | `xcl-sext-i1-to-i64`, `xcl-seed-540` | RDNA2 (gfx1036, 32.0.21045.29003) |
 | `WaveReadLaneFirst` read in a divergent `switch` case | pass everywhere | `xcl-seed-722` | RDNA4 (RX 9070, 32.0.32029.2010) |
 | `Countbits.i64` result shifted by the lane, or'd with its `Bfrev` | – | `xcl-seed-1599` | RDNA4 |
-| i64 compare of values sharing a dword | pass everywhere | VIctory's lowering ([VIctory#1599](https://github.com/Marvisak/VIctory/pull/1599)); not XCL's IR shape | RDNA2, RDNA3, RDNA4 |
+| ordered i64 compare (`lt`/`gt`, signed or not) of values sharing a dword | pass everywhere | `victory-v-cmp-*-shared-dword` (VIctory before [#1599](https://github.com/Marvisak/VIctory/pull/1599)); XCL's IR shape passes | RDNA2 and RDNA4 here; RDNA3 in #1599 |
 
 So a driver bug is a property of the DXIL's exact shape, and a translator has to test the DXIL it writes. That is why this kit runs **DXIL vectors**: a translator's own containers with their inputs and expected outputs. It also runs HLSL probes, which catch what DXC itself does (fast-math, precision).
 
@@ -35,6 +35,11 @@ Two HLSL probes do show differences:
 | `sin-cos-in-turns` | HLSL | info | info | pass |
 | `wave-read-first-in-switch` | HLSL | pass | pass | pass |
 | `dot2add-f16-rounding` | HLSL | info | pass | info |
+| `victory-v-cmp-eq-i64-shared-dword` | DXIL | pass | pass | pass |
+| `victory-v-cmp-gt-i64-shared-dword` | DXIL | **FAIL** | **FAIL** | pass |
+| `victory-v-cmp-gt-u64-shared-dword` | DXIL | **FAIL** | **FAIL** | pass |
+| `victory-v-cmp-lt-i64-shared-dword` | DXIL | **FAIL** | **FAIL** | pass |
+| `victory-v-cmp-lt-u64-shared-dword` | DXIL | **FAIL** | **FAIL** | pass |
 | `xcl-i64-compare-disjoint` | DXIL | pass | pass | skip |
 | `xcl-i64-compare-shared-dword` | DXIL | pass | pass | skip |
 | `xcl-seed-1599` | DXIL | **FAIL** | pass | skip |
@@ -42,7 +47,7 @@ Two HLSL probes do show differences:
 | `xcl-seed-722` | DXIL | **FAIL** | pass | skip |
 | `xcl-sext-i1-to-i64` | DXIL | pass | **FAIL** | skip |
 
-WARP skips the DXIL vectors because they need 32-lane waves.
+WARP skips the `xcl-*` vectors because they need 32-lane waves. The `victory-*` ones run there, which also makes them a CI check.
 
 **More GPUs make this useful:** NVIDIA, Intel, other AMD generations and other drivers. Run it and add your report (see below).
 
@@ -65,20 +70,33 @@ Run `cargo run --release -- --out results/<date>-<your gpus>.md`, then open a pu
 
 ## Add a vector
 
-A vector is `vectors/<id>.dxil` (a DXIL container without a root signature) plus `vectors/<id>.txt`:
+A vector is `vectors/<id>.dxil` (a DXIL container without a root signature) plus `vectors/<id>.txt` in one of two layouts.
+
+XCL's kernels (`layout root-uavs`, the default) use root UAVs `u0..u2` and one dispatch:
 
 ```text
 id <id>
 about <what the right result is>
 origin <where it was found>
-regs u2=in u1=out          # root UAVs u0..u2: which one is the input, which the output
+regs u2=in u1=out          # which root UAV is the input, which the output
 wave 32                    # optional: the wave size it needs
 out_dwords <n>
 in <hex dword> ...
 expect <index>:<hex dword> ...
 ```
 
-The `xcl-*` vectors were written by XCL's direct-DXIL emitter from small programs in its fuzz IR. [`tools/xcl_export.rs`](tools/xcl_export.rs) is the exporter, which goes into XCL's `gpu/dxil/fuzz_tests.rs`. VIctory vectors are next. They need its root layout (user data in root constants, heap-indexed views), which the runner doesn't have yet.
+VIctory's one-thread kernels (`layout victory`) take user data in root constants `b0` and write a raw UAV at index 0 of a directly indexed heap, with one dispatch per case:
+
+```text
+id <id>
+layout victory
+ud_dwords 8                # root constants
+ud_inputs 0:0 1:1 2:2 3:3  # user-data dword : which of the case's 4 inputs
+heap_raw_uav_dwords 1
+case <in0> <in1> <in2> <in3> <expected dword 0>    # hex, one line per dispatch
+```
+
+The `xcl-*` vectors were written by XCL's direct-DXIL emitter from small programs in its fuzz IR ([`tools/xcl_export.rs`](tools/xcl_export.rs), which goes into XCL's `gpu/dxil/fuzz_tests.rs`). The `victory-*` vectors come from VIctory's lowering of single `v_cmp_*_i64` instructions, before #1599's fix ([`tools/victory_export.rs`](tools/victory_export.rs), which goes into the fuzzer file of VIctory#1614).
 
 ## Where these came from
 
@@ -88,6 +106,6 @@ The `xcl-*` vectors were written by XCL's direct-DXIL emitter from small program
 
 ## License
 
-MIT (see `LICENSE`). The `.dxil` files in `vectors/` are output of XCL's emitter (GPL-2.0-only) for the programs in `tools/xcl_export.rs`.
+MIT (see `LICENSE`). The `.dxil` files in `vectors/` are translator output: `xcl-*` from XCL's emitter (GPL-2.0-only), for the programs in `tools/xcl_export.rs`; `victory-*` from VIctory's lowering, for the instructions in `tools/victory_export.rs`.
 
 Written with Claude Code (Claude Opus 5.5). Every result in this README comes from a run on the hardware named.

@@ -221,6 +221,158 @@ impl Gpu {
         self.dispatch(dxil, &rs, &slots, 1, input, out_dwords)
     }
 
+    /// Runs VIctory-style `dxil` once per case: user data in root constants
+    /// (`b0`, `ud_dwords` of them, the case's four inputs at `inputs`' (index,
+    /// input) pairs), the result in a raw UAV at heap index 0 of a directly
+    /// indexed heap. Returns each case's dword 0.
+    pub fn run_victory(
+        &self,
+        dxil: &[u8],
+        ud_dwords: u32,
+        inputs: &[(usize, usize)],
+        uav_dwords: u32,
+        cases: &[[u32; 4]],
+    ) -> Result<Vec<u32>, String> {
+        let param = D3D12_ROOT_PARAMETER1 {
+            ParameterType: D3D12_ROOT_PARAMETER_TYPE_32BIT_CONSTANTS,
+            Anonymous: D3D12_ROOT_PARAMETER1_0 {
+                Constants: D3D12_ROOT_CONSTANTS {
+                    ShaderRegister: 0,
+                    RegisterSpace: 0,
+                    Num32BitValues: ud_dwords,
+                },
+            },
+            ShaderVisibility: D3D12_SHADER_VISIBILITY_ALL,
+        };
+        let desc = D3D12_VERSIONED_ROOT_SIGNATURE_DESC {
+            Version: D3D_ROOT_SIGNATURE_VERSION_1_1,
+            Anonymous: D3D12_VERSIONED_ROOT_SIGNATURE_DESC_0 {
+                Desc_1_1: D3D12_ROOT_SIGNATURE_DESC1 {
+                    NumParameters: 1,
+                    pParameters: &param,
+                    Flags: D3D12_ROOT_SIGNATURE_FLAG_CBV_SRV_UAV_HEAP_DIRECTLY_INDEXED,
+                    ..Default::default()
+                },
+            },
+        };
+        // SAFETY: D3D12 objects are used on this thread only; each case's GPU
+        // work is waited for before its read-back, and every resource outlives
+        // the command list that uses it.
+        unsafe {
+            let d = &self.device;
+            let mut blob: Option<ID3DBlob> = None;
+            D3D12SerializeVersionedRootSignature(&desc, &mut blob, None)
+                .map_err(|e| format!("serialize root signature: {e}"))?;
+            let blob = blob.ok_or("no root signature blob")?;
+            let bytes = std::slice::from_raw_parts(blob.GetBufferPointer().cast::<u8>(), blob.GetBufferSize());
+            let rs: ID3D12RootSignature = d
+                .CreateRootSignature(0, bytes)
+                .map_err(|e| format!("root signature: {e}"))?;
+            let pso: ID3D12PipelineState = d
+                .CreateComputePipelineState(&D3D12_COMPUTE_PIPELINE_STATE_DESC {
+                    pRootSignature: ManuallyDrop::new(Some(rs.clone())),
+                    CS: D3D12_SHADER_BYTECODE {
+                        pShaderBytecode: dxil.as_ptr().cast(),
+                        BytecodeLength: dxil.len(),
+                    },
+                    ..Default::default()
+                })
+                .map_err(|e| format!("pipeline: {e}"))?;
+            let bytes = u64::from(uav_dwords.max(1)) * 4;
+            let out = buffer(
+                d,
+                bytes.max(256),
+                D3D12_HEAP_TYPE_DEFAULT,
+                D3D12_RESOURCE_STATE_COMMON,
+                true,
+            )?;
+            let readback = buffer(d, 256, D3D12_HEAP_TYPE_READBACK, D3D12_RESOURCE_STATE_COPY_DEST, false)?;
+            let heap: ID3D12DescriptorHeap = d
+                .CreateDescriptorHeap(&D3D12_DESCRIPTOR_HEAP_DESC {
+                    Type: D3D12_DESCRIPTOR_HEAP_TYPE_CBV_SRV_UAV,
+                    NumDescriptors: 1,
+                    Flags: D3D12_DESCRIPTOR_HEAP_FLAG_SHADER_VISIBLE,
+                    NodeMask: 0,
+                })
+                .map_err(err)?;
+            d.CreateUnorderedAccessView(
+                &out,
+                None,
+                Some(&D3D12_UNORDERED_ACCESS_VIEW_DESC {
+                    Format: DXGI_FORMAT_R32_TYPELESS,
+                    ViewDimension: D3D12_UAV_DIMENSION_BUFFER,
+                    Anonymous: D3D12_UNORDERED_ACCESS_VIEW_DESC_0 {
+                        Buffer: D3D12_BUFFER_UAV {
+                            FirstElement: 0,
+                            NumElements: uav_dwords.max(1),
+                            StructureByteStride: 0,
+                            CounterOffsetInBytes: 0,
+                            Flags: D3D12_BUFFER_UAV_FLAG_RAW,
+                        },
+                    },
+                }),
+                heap.GetCPUDescriptorHandleForHeapStart(),
+            );
+            let alloc: ID3D12CommandAllocator =
+                d.CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_COMPUTE).map_err(err)?;
+            let fence: ID3D12Fence = d.CreateFence(0, D3D12_FENCE_FLAG_NONE).map_err(err)?;
+            let ev: HANDLE = CreateEventW(None, false, false, None).map_err(err)?;
+            let mut results = Vec::with_capacity(cases.len());
+            let mut first = true;
+            for (n, case) in cases.iter().enumerate() {
+                let mut ud = vec![0u32; ud_dwords as usize];
+                for &(index, input) in inputs {
+                    ud[index] = case[input];
+                }
+                alloc.Reset().map_err(err)?;
+                let list: ID3D12GraphicsCommandList = d
+                    .CreateCommandList(0, D3D12_COMMAND_LIST_TYPE_COMPUTE, &alloc, &pso)
+                    .map_err(err)?;
+                if first {
+                    list.ResourceBarrier(&[transition(
+                        &out,
+                        D3D12_RESOURCE_STATE_COMMON,
+                        D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+                    )]);
+                    first = false;
+                }
+                // A directly indexed heap is set before the root signature.
+                list.SetDescriptorHeaps(&[Some(heap.clone())]);
+                list.SetComputeRootSignature(&rs);
+                list.SetComputeRoot32BitConstants(0, ud_dwords, ud.as_ptr().cast(), 0);
+                list.Dispatch(1, 1, 1);
+                list.ResourceBarrier(&[transition(
+                    &out,
+                    D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+                    D3D12_RESOURCE_STATE_COPY_SOURCE,
+                )]);
+                list.CopyBufferRegion(&readback, 0, &out, 0, 4);
+                list.ResourceBarrier(&[transition(
+                    &out,
+                    D3D12_RESOURCE_STATE_COPY_SOURCE,
+                    D3D12_RESOURCE_STATE_UNORDERED_ACCESS,
+                )]);
+                list.Close().map_err(err)?;
+                self.queue.ExecuteCommandLists(&[Some(list.cast().map_err(err)?)]);
+                let v = n as u64 + 1;
+                self.queue.Signal(&fence, v).map_err(err)?;
+                fence.SetEventOnCompletion(v, ev).map_err(err)?;
+                WaitForSingleObject(ev, INFINITE);
+                let removed = d.GetDeviceRemovedReason();
+                if removed.is_err() {
+                    let _ = CloseHandle(ev);
+                    return Err(format!("device removed: {removed:?}"));
+                }
+                let mut p = std::ptr::null_mut();
+                readback.Map(0, None, Some(&mut p)).map_err(err)?;
+                results.push(*p.cast::<u32>());
+                readback.Unmap(0, None);
+            }
+            let _ = CloseHandle(ev);
+            Ok(results)
+        }
+    }
+
     fn dispatch(
         &self,
         dxil: &[u8],
