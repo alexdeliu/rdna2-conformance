@@ -1,0 +1,21 @@
+[package]
+name = "rdna2-conformance"
+version = "0.1.0"
+edition = "2024"
+license = "MIT"
+description = "GPU driver probes for console RDNA2 -> DXIL shader translators"
+publish = false
+
+[dependencies]
+windows = { version = "0.62.2", features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Direct3D",
+    "Win32_Graphics_Direct3D12",
+    "Win32_Graphics_Dxgi",
+    "Win32_Graphics_Dxgi_Common",
+    "Win32_Security",
+    "Win32_System_Threading",
+] }
+
+[profile.release]
+debug = false
