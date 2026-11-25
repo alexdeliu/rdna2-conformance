@@ -25,4 +25,4 @@ Reproduce: `cargo run --release` runs every probe and vector on every adapter; `
 
 Each vector's `.txt` names its instruction, origin, root layout, inputs and expected outputs. The `.dxil` files are translator output, licensed under their projects' licenses (see the README).
 
-Not reported yet to AMD. Report text, per bug: the vector file, the table row above, and `cargo run --release -- --out report.md` output from the reporter's own machine.
+**Reported to AMD** on 2026-11-25, with all five bugs re-checked on the drivers above that day: [AMD Developer Community, Drivers](https://devcommunity.amd.com/t/d3d12-shader-compiler-5-miscompiles-of-validator-passing-dxil-on-rx-9070-rdna4-and-rdna2-with-repro-vectors/1518). Results on other GPUs and drivers are welcome there or in this repository's issues.
