@@ -69,6 +69,12 @@ const FAST_AND_IEEE: &[Build] = &[
         args: &["-Gis"],
     },
 ];
+/// Strict IEEE only (no `fast` flags on the float ops).
+const GIS: &[Build] = &[Build {
+    label: "-Gis",
+    args: &["-Gis"],
+}];
+
 const HALF: &[Build] = &[Build {
     label: "default",
     args: &["-enable-16bit-types"],
@@ -168,6 +174,22 @@ asuint(a * b, r.z, r.w);";
 const F64_DISJOINT_BODY: &str = "\
 double a = asdouble(x.x, x.y);
 double b = asdouble(x.z, x.w);
+asuint(a + b, r.x, r.y);
+asuint(a * b, r.z, r.w);";
+
+/// [`F64_BODY`] on lane 0's dwords in every lane: uniform values, which the
+/// driver may keep in scalar registers.
+const F64_UNIFORM_BODY: &str = "\
+uint4 u = In.Load4(0);
+double a = asdouble(u.x, u.y);
+double b = asdouble(u.y, u.z);
+asuint(a + b, r.x, r.y);
+asuint(a * b, r.z, r.w);";
+
+const F64_UNIFORM_DISJOINT_BODY: &str = "\
+uint4 u = In.Load4(0);
+double a = asdouble(u.x, u.y);
+double b = asdouble(u.z, u.w);
 asuint(a + b, r.x, r.y);
 asuint(a * b, r.z, r.w);";
 
@@ -399,6 +421,46 @@ pub fn all() -> Vec<Probe> {
             needs_16bit: false,
             input: || lanes(0xF65, F64_FIXED, f64_dwords),
             check: |i, o| per_lane(i, o, |_, x| f64_want(x, true), [!0, !0, !0, !0]),
+        },
+        Probe {
+            id: "f64-shared-dword-uniform",
+            about: "f64-shared-dword with uniform operands (every lane reads lane 0's dwords): the shape a translator's scalar-register doubles take",
+            origin: "rdna2-conformance: narrowing bug 2 (per-lane operands pass)",
+            body: F64_UNIFORM_BODY,
+            builds: PLAIN,
+            needs_16bit: false,
+            input: || lanes(0xF66, F64_FIXED, f64_dwords),
+            check: |i, o| per_lane(i, o, |_, _| f64_want(lane(i, 0), false), [!0, !0, !0, !0]),
+        },
+        Probe {
+            id: "f64-disjoint-uniform",
+            about: "control for the above: uniform operands on disjoint dwords",
+            origin: "rdna2-conformance",
+            body: F64_UNIFORM_DISJOINT_BODY,
+            builds: PLAIN,
+            needs_16bit: false,
+            input: || lanes(0xF67, F64_FIXED, f64_dwords),
+            check: |i, o| per_lane(i, o, |_, _| f64_want(lane(i, 0), true), [!0, !0, !0, !0]),
+        },
+        Probe {
+            id: "f64-shared-dword-gis",
+            about: "f64-shared-dword built with -Gis: no `fast` flags, as a translator's fadd/fmul",
+            origin: "rdna2-conformance: narrowing bug 2",
+            body: F64_BODY,
+            builds: GIS,
+            needs_16bit: false,
+            input: || lanes(0xF68, F64_FIXED, f64_dwords),
+            check: |i, o| per_lane(i, o, |_, x| f64_want(x, false), [!0, !0, !0, !0]),
+        },
+        Probe {
+            id: "f64-shared-dword-uniform-gis",
+            about: "f64-shared-dword-uniform built with -Gis",
+            origin: "rdna2-conformance: narrowing bug 2",
+            body: F64_UNIFORM_BODY,
+            builds: GIS,
+            needs_16bit: false,
+            input: || lanes(0xF69, F64_FIXED, f64_dwords),
+            check: |i, o| per_lane(i, o, |_, _| f64_want(lane(i, 0), false), [!0, !0, !0, !0]),
         },
         Probe {
             id: "sext-bool-to-i64",
