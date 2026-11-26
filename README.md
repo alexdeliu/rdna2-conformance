@@ -71,6 +71,7 @@ Other reports:
 | GPU | driver | commit | result | from |
 |---|---|---|---|---|
 | RX 9070 XT (RDNA4) + WARP | 32.0.32029.2010 | `9f74aa7` | same lines as the RX 9070: the four ordered `victory-v-cmp-*-shared-dword` vectors, `xcl-seed-1599` and `xcl-seed-722` fail with the same values | [#1](https://github.com/alexdeliu/rdna2-conformance/issues/1), @eazyves |
+| RTX 5090 (Blackwell) + Ryzen 9 9950X3D iGPU (gfx1036) + WARP | 32.0.16.2124 / 32.0.21045.29003 | `b14208d` | the RTX 5090 passes every vector; the iGPU fails the same vectors as the gfx1036 column; `dot2add-f16-rounding` on the RTX 5090: 64/64 not correctly rounded (up to 16051 ulp) | [results](results/2026-11-26-rtx5090-9950x3d-igpu-warp.md), @JoeY54 |
 
 WARP skips the `xcl-*` vectors because they need 32-lane waves. The `victory-*` ones run there, which also makes them a CI check.
 
